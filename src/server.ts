@@ -1,0 +1,41 @@
+import connectToDatabase from "./config/database"
+import dotenv from 'dotenv'
+import logger from "./utils/logger"
+import app from "./app"
+import config from "./config/environment"
+
+// let app;
+dotenv.config()
+
+const startServer = async (): Promise<void> => {
+    try {
+        await connectToDatabase()
+
+        const server = app.listen(config.port, () => {
+            logger.info(`Server running in ${config.port}`)
+        })
+
+        const shutdown = async (signal: string) => {
+            logger.info(`${signal} received. Shutting down gracefully...`);
+
+            server.close(async () => {
+                await connectToDatabase()
+                logger.info("Server closed.")
+                process.exit(1)
+            })
+
+            setTimeout(() => {
+                logger.error('Force shutdown after timeout.')
+                process.exit(1)
+            }, 10000)
+        }
+
+        process.on('SIGINT', () => shutdown('SIGINT'))
+        process.on('SIGTERM', () => shutdown('SIGTERM'))
+    } catch (error) {
+        logger.error('Server startup failed:', error as any)
+        process.exit(1)
+    }
+}
+
+startServer()

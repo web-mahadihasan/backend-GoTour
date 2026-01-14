@@ -1,34 +1,27 @@
 {
-  "compilerOptions": {
-    /* Language and Environment */
-    "target": "ES2020",
-    "lib": ["ES2020"],
-    "module": "ESNext",
-    
-    /* Module Resolution */
-    "moduleResolution": "bundler",
-    "resolveJsonModule": true,
-    "allowJs": true,
-    "allowImportingTsExtensions": true,
-    
-    /* Output */
-    "outDir": "./dist",
-    "rootDir": "./src",
-    
-    /* Type Checking */
-    "strict": true,
-    "esModuleInterop": true,
-    "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true,
-    "strictPropertyInitialization": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    
-    /* Source Maps (helpful for debugging in production) */
-    "sourceMap": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
+	"compilerOptions": {
+		"target": "ES2022",
+		"module": "ESNext",
+		"lib": ["ES2022"],
+		"outDir": "./dist",
+		"rootDir": "./src",
+		"esModuleInterop": true,
+		"resolveJsonModule": true,
+		"strict": true,
+		"forceConsistentCasingInFileNames": true,
+		"skipLibCheck": true,
+		"verbatimModuleSyntax": true,
+
+		"sourceMap": true,
+		"removeComments": false,
+		"noUnusedLocals": true,
+		"noUnusedParameters": true,
+		"noImplicitReturns": true,
+		"noFallthroughCasesInSwitch": true,
+		"paths": {
+			"@/*": ["./src/*"]
+		}
+	},
+	"include": ["src/**/*"],
+	"exclude": ["node_modules", "dist"]
 }
