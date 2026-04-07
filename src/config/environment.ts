@@ -2,15 +2,44 @@ import dotenv from 'dotenv'
 
 dotenv.config()
 
-const config = {
-    env: process.env.NODE_ENV || 'development',
-    port: process.env.PORT || '8000',
-    host: process.env.HOST || 'localhost',
-    clientUrl: process.env.CLIENT_URL || 'http://localhost:5173',
-    mongodbUri: process.env.MONGODB_URI,
-    isDevelopment: process.env.NODE_ENV === 'development',
-    isProduction: process.env.NODE_ENV === 'production',
-    logLevel: process.env.LOG_LEVEL || 'info',
-} as const
+interface EnvConfig {
+    env: string;
+    port: string;
+    host: string;
+    clientUrl: string;
+    mongodbUri: string;
+    isDevelopment: boolean;
+    isProduction: boolean;
+    logLevel: string;
+}
+
+const loadEnvVariables = (): EnvConfig => {
+    const requiredEnvVariables: string[] = [
+        'NODE_ENV',
+        'PORT',
+        'HOST',
+        'CLIENT_URL',
+        'MONGODB_URI',
+    ]
+
+    requiredEnvVariables.forEach(variable => {
+        if (!process.env[variable]) {
+            throw new Error(`Missing required environment variable: ${variable}`);
+        }
+    })
+
+    return {
+        env: process.env.NODE_ENV as string,
+        port: process.env.PORT as string,
+        host: process.env.HOST as string,
+        clientUrl: process.env.CLIENT_URL as string,
+        mongodbUri: process.env.MONGODB_URI as string,
+        isDevelopment: process.env.NODE_ENV === 'development',
+        isProduction: process.env.NODE_ENV === 'production',
+        logLevel: process.env.LOG_LEVEL || 'info',
+    };
+}
+
+const config = loadEnvVariables()
 
 export default config;

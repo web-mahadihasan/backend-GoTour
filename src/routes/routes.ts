@@ -1,12 +1,13 @@
-import { Router, type Request, type Response } from "express"
+import { Router } from "express"
+import userRouter from "../modules/user/user.route"
+
+const routes = [
+    { path: "/user", router: userRouter },
+    // add more modules here, e.g: { path: "/tour", router: tourRouter }
+]
 
 const router = Router()
 
-router.get("/health", (req: Request, res: Response) => {
-    res.status(200).json({
-        status: 'OK',
-        timestamp: new Date().toISOString(),
-    })
-})
+routes.forEach(({ path, router: moduleRouter }) => router.use(path, moduleRouter))
 
-export default router;
+export default router

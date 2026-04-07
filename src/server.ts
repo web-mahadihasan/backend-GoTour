@@ -1,11 +1,7 @@
+import config from "./config/environment"
 import connectToDatabase from "./config/database"
-import dotenv from 'dotenv'
 import logger from "./utils/logger"
 import app from "./app"
-import config from "./config/environment"
-
-// let app;
-dotenv.config()
 
 const startServer = async (): Promise<void> => {
     try {
@@ -32,6 +28,10 @@ const startServer = async (): Promise<void> => {
 
         process.on('SIGINT', () => shutdown('SIGINT'))
         process.on('SIGTERM', () => shutdown('SIGTERM'))
+        process.on('unhandledRejection', (error) => {
+            logger.error("Unhandled rejection: " + (error instanceof Error ? error.message : String(error)))
+            shutdown('unhandledRejection')
+        })
     } catch (error) {
         logger.error("Server startup failed: " + (error instanceof Error ? error.message : String(error)))
         process.exit(1)
