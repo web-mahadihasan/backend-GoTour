@@ -33,7 +33,7 @@ const startServer = async (): Promise<void> => {
         process.on('SIGINT', () => shutdown('SIGINT'))
         process.on('SIGTERM', () => shutdown('SIGTERM'))
     } catch (error) {
-        logger.error('Server startup failed:', error as any)
+        logger.error("Server startup failed: " + (error instanceof Error ? error.message : String(error)))
         process.exit(1)
     }
 }
