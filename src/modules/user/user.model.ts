@@ -1,18 +1,23 @@
+import bcrypt from 'bcrypt'
 import { model, Schema } from 'mongoose'
 import type { IAuthProviders, IUser } from './user.interface'
 import { USER_ROLES, USER_STATUS } from './user.interface'
+import config from '@/config/environment'
 
 // ─── Mongoose Schema ──────────────────────────────────────────────────────────
-export const authProvidersSchema = new Schema<IAuthProviders>({
-    provider: {
-        type: String,
-        required: true,
+export const authProvidersSchema = new Schema<IAuthProviders>(
+    {
+        provider: {
+            type: String,
+            required: true,
+        },
+        providerId: {
+            type: String,
+            required: true,
+        },
     },
-    providerId: {
-        type: String,
-        required: true,
-    },
-})
+    { _id: false },
+)
 
 const userSchema = new Schema<IUser>(
     {
@@ -45,7 +50,7 @@ const userSchema = new Schema<IUser>(
             // required: [true, 'Phone number is required'],
             validate: {
                 validator: function (v: string) {
-                    return  /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/.test(v)
+                    return  /^(?:\+?880|0)1[3-9]\d{8}$/.test(v)
                 },
                 message: '{VALUE} is not a valid phone number'
             }
@@ -73,6 +78,10 @@ const userSchema = new Schema<IUser>(
             type: Boolean,
             default: false,
         },
+        isDeleted: {
+            type: Boolean,
+            default: false,
+        }
     },
     {
         timestamps: true,
@@ -82,19 +91,18 @@ const userSchema = new Schema<IUser>(
 
 // ─── Pre-save Hook: Hash password ─────────────────────────────────────────────
 
-// userSchema.pre('save', async function (next) {
-//     if (!this.isModified('password')) return next()
-//     this.password = await bcrypt.hash(this.password, 12)
-//     next()
-// })
+userSchema.pre('save', async function () {
+    if (!this.isModified('password') || !this.password) return
+    this.password = await bcrypt.hash(this.password, Number(config.BCRYPT_SALT_ROUND))
+})
 
 // ─── Instance Method: Compare password ───────────────────────────────────────
 
-// userSchema.methods.comparePassword = async function (
-//     candidatePassword: string,
-// ): Promise<boolean> {
-//     return bcrypt.compare(candidatePassword, this.password)
-// }
+userSchema.methods.comparePassword = async function (
+    candidatePassword: string,
+): Promise<boolean> {
+    return bcrypt.compare(candidatePassword, this.password)
+}
 
 // ─── Model ────────────────────────────────────────────────────────────────────
 

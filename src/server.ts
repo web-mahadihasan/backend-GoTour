@@ -7,8 +7,8 @@ const startServer = async (): Promise<void> => {
     try {
         await connectToDatabase()
 
-        const server = app.listen(config.port, () => {
-            logger.info(`Server running in ${config.port}`)
+        const server = app.listen(config.PORT, () => {
+            logger.info(`Server running in ${config.PORT}`)
         })
 
         const shutdown = async (signal: string) => {

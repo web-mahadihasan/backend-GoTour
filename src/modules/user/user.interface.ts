@@ -42,14 +42,18 @@ export const CreateUserSchema = v.object({
         v.email('Invalid email address'),
     ),
     password: v.optional(
-        v.pipe(
-            v.string('Password must be a string'),
-            v.minLength(6, 'Password must be at least 6 characters'),
-            v.regex(
-                /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]).+$/,
-                'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-            ),
+    v.pipe(
+        v.string('Password must be a string'),
+        v.minLength(8, 'Password must be at least 8 characters'),
+
+        v.regex(/[A-Z]/, 'Must contain at least one uppercase letter'),
+        v.regex(/[a-z]/, 'Must contain at least one lowercase letter'),
+        v.regex(/\d/, 'Must contain at least one number'),
+        v.regex(
+        /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
+        'Must contain at least one special character'
         ),
+    )
     ),
     phone: v.pipe(
         v.string('Phone must be a string'),
@@ -65,20 +69,23 @@ export const CreateUserSchema = v.object({
             v.url('Invalid URL'),
         ),
     ),
-    authProviders: v.pipe(
-        v.array(
-            v.object({
-                provider: v.string('Provider must be a string'),
-                providerId: v.string('Provider ID must be a string'),
-            }),
+    authProviders: v.optional(
+        v.pipe(
+            v.array(
+                v.object({
+                    provider: v.string('Provider must be a string'),
+                    providerId: v.string('Provider ID must be a string'),
+                }),
+            ),
+            v.maxLength(1, 'Only one auth provider is allowed'),
         ),
-        v.maxLength(1, 'Only one auth provider is allowed'),
     ),
     isVerified: v.optional(
         v.boolean('isVerified must be a boolean'),
         false,
     ),
     isActive: v.optional(UserStatusSchema, 'active'),
+    isDeleted: v.optional(v.boolean(), false)
 })
 
 export const UpdateUserSchema = v.partial(
@@ -93,4 +100,5 @@ export type TUpdateUser = InferOutput<typeof UpdateUserSchema>
 export interface IUser extends TCreateUser {
     createdAt?: Date
     updatedAt?: Date
+    comparePassword(candidatePassword: string): Promise<boolean>
 }

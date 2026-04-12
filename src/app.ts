@@ -3,7 +3,7 @@ import cors from 'cors'
 import { StatusCodes } from 'http-status-codes'
 import router from './routes/routes'
 import notFoundRoute from './middlewares/notFoundRoute'
-import globalErrorHandler from './middlewares/globalErrorHandler'
+import GlobalErrorHandler from './middlewares/globalErrorHandler'
 
 const app: Express = express()
 
@@ -15,14 +15,14 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use("/api/v1", router)
 
-app.get("/api/v1/health", (req: Request, res: Response) => {
+app.get("/api/v1/health", (_req: Request, res: Response) => {
     res.status(StatusCodes.OK).json({
         success: true,
         message: "Health is okay"
     })
 })
 
-app.get("/", (req: Request, res: Response) => {
+app.get("/", (_req: Request, res: Response) => {
     res.status(StatusCodes.FORBIDDEN).json({
         success: false,
         message: "You have hit the root URL. Please use the /api/v1 endpoints for API operations."
@@ -30,7 +30,7 @@ app.get("/", (req: Request, res: Response) => {
 })
 
 // Global error handler
-app.use(globalErrorHandler)
+app.use(GlobalErrorHandler)
 
 // catch all other undefined routes
 app.use(notFoundRoute)
