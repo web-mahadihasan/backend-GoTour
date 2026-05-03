@@ -31,30 +31,35 @@ export type UserRole = InferOutput<typeof UserRoleSchema>
 
 // ─── Valibot Schemas ──────────────────────────────────────────────────────────
 
+export const PasswordSchema = v.pipe(
+    v.string('Password must be a string'),
+    v.minLength(8, 'Password must be at least 8 characters'),
+
+    v.regex(/[A-Z]/, 'Must contain at least one uppercase letter'),
+    v.regex(/[a-z]/, 'Must contain at least one lowercase letter'),
+    v.regex(/\d/, 'Must contain at least one number'),
+    v.regex(
+        /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
+        'Must contain at least one special character'
+    ),
+)
+
 export const CreateUserSchema = v.object({
-    name: v.pipe(
+    firstName: v.pipe(
         v.string('Name must be a string'),
         v.minLength(2, 'Name must be at least 2 characters'),
         v.maxLength(50, 'Name must be at most 50 characters'),
+    ),
+    lastName: v.pipe(
+        v.string('Name must be a string'),
+        v.minLength(1, 'Name must be at least 1 characters'),
+        v.maxLength(100, 'Name must be at most 100 characters'),
     ),
     email: v.pipe(
         v.string('Email must be a string'),
         v.email('Invalid email address'),
     ),
-    password: v.optional(
-    v.pipe(
-        v.string('Password must be a string'),
-        v.minLength(8, 'Password must be at least 8 characters'),
-
-        v.regex(/[A-Z]/, 'Must contain at least one uppercase letter'),
-        v.regex(/[a-z]/, 'Must contain at least one lowercase letter'),
-        v.regex(/\d/, 'Must contain at least one number'),
-        v.regex(
-        /[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]/,
-        'Must contain at least one special character'
-        ),
-    )
-    ),
+    password: v.optional(PasswordSchema),
     phone: v.pipe(
         v.string('Phone must be a string'),
         v.regex(
@@ -92,12 +97,19 @@ export const UpdateUserSchema = v.partial(
     v.omit(CreateUserSchema, ['email']),
 )
 
+export const ChangePasswordSchema = v.object({
+    oldPassword: v.string('Old password is required'),
+    newPassword: PasswordSchema,
+})
+
 // ─── TypeScript Types ─────────────────────────────────────────────────────────
 
 export type TCreateUser = InferOutput<typeof CreateUserSchema>
 export type TUpdateUser = InferOutput<typeof UpdateUserSchema>
+export type TChangePassword = InferOutput<typeof ChangePasswordSchema>
 
 export interface IUser extends TCreateUser {
+    fullName?: string
     createdAt?: Date
     updatedAt?: Date
     comparePassword(candidatePassword: string): Promise<boolean>

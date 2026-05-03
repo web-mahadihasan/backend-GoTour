@@ -1,6 +1,6 @@
-import config from "./config/environment"
-import connectToDatabase from "./config/database"
-import logger from "./utils/logger"
+import config from "./app/config/environment"
+import connectToDatabase from "./app/config/database"
+import logger from "./app/utils/logger"
 import app from "./app"
 
 const startServer = async (): Promise<void> => {

@@ -1,10 +1,10 @@
-import config from "@/config/environment"
-import AppError from "@/errorHelper/appError"
+import config from "@/app/config/environment"
+import AppError from "@/app/errorHelper/appError"
 import jwt, { type JwtPayload } from "jsonwebtoken"
 import httpStatus from "http-status-codes"
 import type { NextFunction, Request, Response } from "express"
 
-const checkAuth = (...authRoles: string[]) => async (req: Request, res: Response, next: NextFunction) => {
+const checkAuth = (...authRoles: string[]) => async (req: Request, _res: Response, next: NextFunction) => {
     try {
         const token = req.headers.authorization
         if (!token) {
@@ -16,7 +16,7 @@ const checkAuth = (...authRoles: string[]) => async (req: Request, res: Response
             throw new AppError("Unauthorized access", httpStatus.UNAUTHORIZED)
         }
         
-        req.user = decoded
+        req.user = decoded as Express.User
         next()
     } catch (error) {
         next(error)

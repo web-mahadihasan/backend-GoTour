@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import config from "@/config/environment";
-import AppError from "@/errorHelper/appError";
+import config from "@/app/config/environment";
+import AppError from "@/app/errorHelper/appError";
 import type { NextFunction, Request, Response } from "express";
 import { ValiError, getDotPath } from "valibot";
 

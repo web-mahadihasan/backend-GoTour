@@ -1,9 +1,10 @@
 import type { Request, Response } from "express";
 import httpStatus from "http-status-codes";
 import { userService } from "./user.service";
-import tryCatchAsync from "@/utils/tryCatchAsync";
-import AppError from "@/errorHelper/appError";
-import SendResponse from "@/utils/sendResponse";
+import tryCatchAsync from "@/app/utils/tryCatchAsync";
+import AppError from "@/app/errorHelper/appError";
+import SendResponse from "@/app/utils/sendResponse";
+import type { JwtPayload } from "jsonwebtoken";
 
 const createUser = tryCatchAsync(async (req: Request, res: Response) => {
     const body = req.body
@@ -51,8 +52,26 @@ const getSingleUser = tryCatchAsync(async (req: Request, res: Response) => {
     })
 })
 
+const updateSingleUser = tryCatchAsync(async (req: Request, res: Response) => {
+    const { id } = req.params
+    const body = req.body
+    const user = req.user
+
+    const result = await userService.updateSingleUser(id as string, body, user as JwtPayload)
+
+    SendResponse(res, {
+        StatusCode: httpStatus.OK,
+        success: true,
+        message: "User updated successfully",
+        data: result
+    })
+})
+
+
+
 export const userController = {
     createUser,
     getAllUser,
-    getSingleUser
+    getSingleUser,
+    updateSingleUser,
 }

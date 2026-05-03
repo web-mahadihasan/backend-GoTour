@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt'
 import { model, Schema } from 'mongoose'
 import type { IAuthProviders, IUser } from './user.interface'
 import { USER_ROLES, USER_STATUS } from './user.interface'
-import config from '@/config/environment'
+import config from '@/app/config/environment'
 
 // ─── Mongoose Schema ──────────────────────────────────────────────────────────
 export const authProvidersSchema = new Schema<IAuthProviders>(
@@ -21,12 +21,19 @@ export const authProvidersSchema = new Schema<IAuthProviders>(
 
 const userSchema = new Schema<IUser>(
     {
-        name: {
+        firstName: {
             type: String,
-            required: [true, 'Name is required'],
+            required: [true, 'First name is required'],
             trim: true,
-            minlength: [2, 'Name must be at least 2 characters'],
-            maxlength: [50, 'Name must be at most 50 characters'],
+            minlength: [2, 'First name must be at least 2 characters'],
+            maxlength: [50, 'First name must be at most 50 characters'],
+        },
+        lastName: {
+            type: String,
+            required: [true, 'Last name is required'],
+            trim: true,
+            minlength: [1, 'Last Name must be at least 2 characters'],
+            maxlength: [100, 'Last Name must be at most 100 characters'],
         },
         email: {
             type: String,
@@ -59,7 +66,7 @@ const userSchema = new Schema<IUser>(
             type: String,
             validate: {
                 validator: function (v: string) {
-                    return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/i.test(v)
+                    return /^https?:\/\/.+/i.test(v)
                 },
                 message: '{VALUE} is not a valid image URL'
             }
@@ -86,8 +93,16 @@ const userSchema = new Schema<IUser>(
     {
         timestamps: true,
         versionKey: false,
+        toJSON: { virtuals: true },
+        toObject: { virtuals: true },
     },
 )
+
+// ─── Virtuals ─────────────────────────────────────────────────────────────────
+
+userSchema.virtual('fullName').get(function (this: IUser) {
+    return `${this.firstName} ${this.lastName}`
+})
 
 // ─── Pre-save Hook: Hash password ─────────────────────────────────────────────
 

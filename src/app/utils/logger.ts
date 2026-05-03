@@ -1,4 +1,4 @@
-import config from "@/config/environment";
+import config from "@/app/config/environment";
 import pino from "pino";
 
 const logger = pino({
