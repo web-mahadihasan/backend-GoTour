@@ -21,6 +21,8 @@ interface EnvConfig {
     GOOGLE_CLIENT_SECRET: string;
     GOOGLE_CALLBACK_URL: string;
     FRONTEND_URL: string;
+    MASTER_ADMIN_EMAIL: string;
+    MASTER_ADMIN_PASSWORD: string;
 }
 
 const loadEnvVariables = (): EnvConfig => {
@@ -40,6 +42,8 @@ const loadEnvVariables = (): EnvConfig => {
         'GOOGLE_CLIENT_SECRET',
         'GOOGLE_CALLBACK_URL',
         'FRONTEND_URL',
+        'MASTER_ADMIN_EMAIL',
+        'MASTER_ADMIN_PASSWORD',
     ]
 
     requiredEnvVariables.forEach(variable => {
@@ -67,6 +71,8 @@ const loadEnvVariables = (): EnvConfig => {
         GOOGLE_CLIENT_SECRET: process.env.GOOGLE_CLIENT_SECRET as string,
         GOOGLE_CALLBACK_URL: process.env.GOOGLE_CALLBACK_URL as string,
         FRONTEND_URL: process.env.FRONTEND_URL as string,
+        MASTER_ADMIN_EMAIL: process.env.MASTER_ADMIN_EMAIL as string,
+        MASTER_ADMIN_PASSWORD: process.env.MASTER_ADMIN_PASSWORD as string,
     };
 }
 

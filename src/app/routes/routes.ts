@@ -3,7 +3,7 @@ import userRouter from "../modules/user/user.route"
 import authRouter from "../modules/auth/auth.route"
 
 const routes = [
-    { path: "/user", router: userRouter },
+    { path: "/users", router: userRouter },
     { path: "/auth", router: authRouter },
     // add more modules here, e.g: { path: "/tour", router: tourRouter }
 ]

@@ -3,42 +3,61 @@
 import config from "@/app/config/environment";
 import AppError from "@/app/errorHelper/appError";
 import type { NextFunction, Request, Response } from "express";
-import { ValiError, getDotPath } from "valibot";
+import { ValiError } from "valibot";
+import type { TErrorSources } from "../interfaces/error.types";
+import valibotErrorHandler from "../helper/valibotErrorHandler";
+import handleCastError from "../helper/handleCastError";
+import handleDuplicateError from "../helper/handleDuplicateError";
+import handleValidationError from "../helper/handleValidationError";
+
 
 const GlobalErrorHandler = (error: any, _req: Request, res: Response, _next: NextFunction) => {
     let statusCode = 500;
     let message = 'Something went wrong!!'
-    let err: any = error;
+    let errorSources: TErrorSources[] = error;
 
-    if (err instanceof ValiError) {
+    if (error instanceof ValiError) {
         statusCode = 400
-        // Use the first issue's message as the top-level message
-        message = err.issues[0]?.message ?? 'Validation error'
+        const {message: valibotMessage, formattedErrors} = valibotErrorHandler(error)
 
-        const formattedErrors = err.issues.map((issue) => ({
-            field: getDotPath(issue) ?? 'unknown',
-            message: issue.message,
-        }))
+        message = valibotMessage
+        errorSources = formattedErrors
 
-        err = formattedErrors
-    }
+    } else if (error?.code === 11000) {
+        const duplicateError = handleDuplicateError(error)
 
-    if (err instanceof AppError) {
-        statusCode = err.statusCode
-        message = err.message
-    } else if (err?.name === "CastError") {
-        statusCode = 400
-        message = "Invalid ID!"
-    } else if (err instanceof Error) {
+        statusCode = duplicateError.statusCode
+        message = duplicateError.message
+        errorSources = duplicateError.errorSources as TErrorSources[]
+
+    } else if (error?.name === "CastError") {
+        const castError = handleCastError(error)
+
+        statusCode = castError.statusCode
+        message = castError.message
+
+    } else if (error.name === "ValidationError") {
+        const validationError = handleValidationError(error)
+
+        statusCode = validationError.statusCode || 400
+        message = validationError.message
+        errorSources = validationError.errorSources as TErrorSources[]
+
+
+    } else if (error instanceof AppError) {
+        statusCode = error.statusCode
+        message = error.message
+
+    } else if (error instanceof Error) {
         statusCode = 500
-        message = err.message
+        message = error.message
     }
 
     res.status(statusCode).json({
         success: false,
         message,
-        error: err,
-        stack: config.IS_DEVELOPMENT ? err.stack : null
+        error: errorSources,
+        stack: config.IS_DEVELOPMENT ? error.stack : null
     })
 }
 

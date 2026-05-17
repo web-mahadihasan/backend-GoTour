@@ -54,7 +54,7 @@ const userSchema = new Schema<IUser>(
         },
         phone: {
             type: String,
-            // required: [true, 'Phone number is required'],
+            required: [true, 'Phone number is required'],
             validate: {
                 validator: function (v: string) {
                     return  /^(?:\+?880|0)1[3-9]\d{8}$/.test(v)
@@ -64,6 +64,7 @@ const userSchema = new Schema<IUser>(
         },
         picture: {
             type: String,
+            required: [true, 'Picture is required'],
             validate: {
                 validator: function (v: string) {
                     return /^https?:\/\/.+/i.test(v)

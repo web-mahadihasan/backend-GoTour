@@ -1,17 +1,23 @@
 import { Router } from "express";
 import { authController } from "./auth.controller";
 import checkAuth from "@/app/middlewares/checkAuth";
-import { ChangePasswordSchema, USER_ROLES } from "../user/user.interface";
+import { ChangePasswordSchema, CreateUserSchema, USER_ROLES } from "../user/user.interface";
 import validateRequestBody from "@/app/middlewares/validateRequestBody";
 import passport from "passport";
 
 
 const authRouter = Router();
 
+authRouter.route("/register")
+    .post(validateRequestBody(CreateUserSchema), authController.registerUser)
+
 authRouter.route("/login")
     .post(authController.credentialsLogin)
 
-authRouter.route("/refresh-token")
+authRouter.route("/me/logout")
+    .post(checkAuth(...Object.values(USER_ROLES)), authController.userLogout)
+
+authRouter.route("/me/refresh-token")
     .post(authController.refreshToken)
     
 authRouter.route("/me/reset-password")

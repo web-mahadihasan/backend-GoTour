@@ -60,11 +60,13 @@ export const CreateUserSchema = v.object({
         v.email('Invalid email address'),
     ),
     password: v.optional(PasswordSchema),
-    phone: v.pipe(
-        v.string('Phone must be a string'),
-        v.regex(
-            /^(?:\+?880|0)1[3-9]\d{8}$/,
-            'Invalid phone number. Please use BD number (e.g. 01XXXXXXXXX or +8801XXXXXXXXX)',
+    phone: v.optional(
+        v.pipe(
+            v.string('Phone must be a string'),
+            v.regex(
+                /^(?:\+?880|0)1[3-9]\d{8}$/,
+                'Invalid phone number. Please use BD number (e.g. 01XXXXXXXXX or +8801XXXXXXXXX)',
+            ),
         ),
     ),
     role: v.optional(UserRoleSchema, USER_ROLES.USER),

@@ -6,7 +6,7 @@ import type { NextFunction, Request, Response } from "express"
 
 const checkAuth = (...authRoles: string[]) => async (req: Request, _res: Response, next: NextFunction) => {
     try {
-        const token = req.headers.authorization
+        const token = req.cookies.accessToken
         if (!token) {
             throw new AppError("Unauthorized access", httpStatus.UNAUTHORIZED)
         }

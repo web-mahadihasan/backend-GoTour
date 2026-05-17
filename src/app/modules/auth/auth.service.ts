@@ -7,38 +7,38 @@ import { verifyToken } from "@/app/utils/jwt";
 import config from "@/app/config/environment";
 import type { JwtPayload } from "jsonwebtoken";
 
-const credentialsLogin = async (payload: Partial<TCreateUser>) => {
-    const {email, password} = payload || {}
+
+const registerUser = async (payload: Partial<TCreateUser>) => {
+    const isUserExist = await User.findOne({ email: payload.email })
+
+    if (isUserExist) {
+        throw new AppError("User already exist", httpStatus.BAD_REQUEST)
+    }
+    const authProviders = [{ provider: "credentials", providerId: payload.email }]
+
+    // User.create() calls new User(doc).save() internally,
+    // which automatically triggers the pre('save') hook to hash the password.
+    const user = await User.create({ ...payload, authProviders })
+
+    const userDoc = user.toObject()
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { password: _, ...userWithoutPassword } = userDoc
     
-    const isUserExist = await User.findOne({email})
+    return userWithoutPassword
+}
 
-    if(!isUserExist) {
-        throw new AppError("User not found", httpStatus.NOT_FOUND)
-    }
-    // If no password is provided in payload
-    if (!password) {
-        throw new AppError("Password is required", httpStatus.BAD_REQUEST)
-    }
-
-    // Call the instance method directly on the returned mongoose document
-    const isPasswordMatched = await isUserExist.comparePassword(password)
-
-    if (!isPasswordMatched) {
-        throw new AppError("Invalid credentials", httpStatus.UNAUTHORIZED)
-    }
-    const userDoc = isUserExist.toObject()
-    // const { password: _, ...userWithoutPassword } = userDoc
-    
+const credentialsLogin = async (payload: Express.User) => {
     const jwtPayload = {
-        _id: userDoc._id,
-        email: userDoc.email,
-        role: userDoc.role,
-        name: userDoc.fullName
+        _id: payload._id,
+        email: payload.email,
+        role: payload.role,
+        name: payload.fullName
     }
 
     const {accessToken, refreshToken} = createUserTokens(jwtPayload)
 
-    // Return the sanitized user (or JWT token)
+    // const {password, ...rest} = payload
+
     return {token: {accessToken, refreshToken}, user: jwtPayload}
 }
 
@@ -90,5 +90,6 @@ const resetPassword = async (id: string, payload: TChangePassword) => {
 export const authService = {
     credentialsLogin,
     refreshToken,
-    resetPassword
+    resetPassword,
+    registerUser
 }

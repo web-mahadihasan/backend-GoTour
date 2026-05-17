@@ -13,4 +13,14 @@ const connectToDatabase = async (): Promise<void> => {
         process.exit(1)
     }
 }
+
+export const disconnectFromDatabase = async () => {
+    try {
+        await mongoose.disconnect()
+        logger.info('MongoDB disconnected successfully')
+    } catch (error) {
+        const errorMessage = error instanceof Error ? error.message : String(error)
+        logger.error(`MongoDB disconnection failed: ${errorMessage}`)
+    }
+}
 export default connectToDatabase;

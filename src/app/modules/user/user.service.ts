@@ -1,27 +1,8 @@
 import httpStatus from 'http-status-codes';
-import { USER_ROLES, type TCreateUser, type TUpdateUser } from "./user.interface"
+import { USER_ROLES, type TUpdateUser } from "./user.interface"
 import User from "./user.model"
 import AppError from '@/app/errorHelper/appError';
 import type { JwtPayload } from 'jsonwebtoken';
-
-const createUser = async (payload: Partial<TCreateUser>) => {
-    const isUserExist = await User.findOne({ email: payload.email })
-
-    if (isUserExist) {
-        throw new AppError("User already exist", httpStatus.BAD_REQUEST)
-    }
-    const authProviders = [{ provider: "credentials", providerId: payload.email }]
-
-    // User.create() calls new User(doc).save() internally,
-    // which automatically triggers the pre('save') hook to hash the password.
-    const user = await User.create({ ...payload, authProviders })
-
-    const userDoc = user.toObject()
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-    const { password: _, ...userWithoutPassword } = userDoc
-    
-    return userWithoutPassword
-}
 
 const getAllUser = async () => {
     const users = await User.find()
@@ -65,7 +46,6 @@ const updateSingleUser = async (id: string, payload: Partial<TUpdateUser>, user:
 }
 
 export const userService = {
-    createUser,
     getAllUser,
     getSingleUser,
     updateSingleUser

@@ -6,23 +6,6 @@ import AppError from "@/app/errorHelper/appError";
 import SendResponse from "@/app/utils/sendResponse";
 import type { JwtPayload } from "jsonwebtoken";
 
-const createUser = tryCatchAsync(async (req: Request, res: Response) => {
-    const body = req.body
-    const result = await userService.createUser(body)
-    
-    if (!result) {
-        throw new AppError("user not created", httpStatus.BAD_REQUEST)
-    }
-    
-    SendResponse(res, {
-        StatusCode: httpStatus.CREATED,
-        success: true,
-        message: "user create successfully",
-        data: result
-    })
-
-})
-
 const getAllUser = tryCatchAsync(async (_req: Request, res: Response) => {
     const data = await userService.getAllUser()
     
@@ -70,7 +53,6 @@ const updateSingleUser = tryCatchAsync(async (req: Request, res: Response) => {
 
 
 export const userController = {
-    createUser,
     getAllUser,
     getSingleUser,
     updateSingleUser,

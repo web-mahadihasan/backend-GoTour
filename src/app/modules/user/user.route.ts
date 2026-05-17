@@ -1,19 +1,19 @@
 import { Router } from "express"
 import { userController } from "./user.controller"
 import validateRequestBody from "../../middlewares/validateRequestBody"
-import { CreateUserSchema, UpdateUserSchema, USER_ROLES } from "./user.interface"
+import { UpdateUserSchema, USER_ROLES } from "./user.interface"
 import checkAuth from "@/app/middlewares/checkAuth"
 
 const userRouter = Router()
 
-userRouter.route("/get/all")
+userRouter.route("/all")
     .get(checkAuth("admin", "super_admin"), userController.getAllUser)
 
-userRouter.route("/get/:id")
+userRouter.route("/:id")
     .get(userController.getSingleUser)
 
-userRouter.route("/register")
-    .post(validateRequestBody(CreateUserSchema), userController.createUser)
+// userRouter.route("/register")
+//     .post(validateRequestBody(CreateUserSchema), userController.createUser)
 
 userRouter.route("/update/:id")
     .patch(checkAuth(...Object.values(USER_ROLES)), validateRequestBody(UpdateUserSchema), userController.updateSingleUser)

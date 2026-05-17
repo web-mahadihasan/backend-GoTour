@@ -10,24 +10,41 @@ import type { JwtPayload } from "jsonwebtoken";
 import passport from "passport";
 import { authService } from "./auth.service";
 
-const credentialsLogin = tryCatchAsync(async (req: Request, res: Response) => {
+const registerUser = tryCatchAsync(async (req: Request, res: Response) => {
     const body = req.body
-    const data = await authService.credentialsLogin(body)
-
-    if(!data.token.refreshToken || !data.token.accessToken) {
-        throw new AppError("Login failed! please try again", httpStatus.BAD_REQUEST)
+    const result = await authService.registerUser(body)
+    
+    if (!result) {
+        throw new AppError("user not created", httpStatus.BAD_REQUEST)
     }
     
-    // Set cookie in browser
-    setAuthCookie(res, data.token.accessToken, data.token.refreshToken)
-    
-    // throw new AppError("Login failed! please try again", httpStatus.BAD_REQUEST)
     SendResponse(res, {
-        StatusCode: httpStatus.OK,
+        StatusCode: httpStatus.CREATED,
         success: true,
-        message: "user login successfully",
-        data: data
+        message: "user create successfully",
+        data: result
     })
+
+})
+
+const credentialsLogin = tryCatchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    
+    passport.authenticate("local", async (err: Error | null, user: Express.User | false | undefined, info: {message: string}) => {
+        
+        if (err) return next(new AppError(err.message, httpStatus.BAD_REQUEST))
+        if (!user) return next(new AppError(info.message, httpStatus.UNAUTHORIZED))
+        
+        const data = await authService.credentialsLogin(user.toObject())
+
+        setAuthCookie(res, data.token.accessToken, data.token.refreshToken)
+
+        SendResponse(res, {
+            StatusCode: httpStatus.OK,
+            success: true,
+            message: "Login successful",
+            data: data.user
+        })
+    })(req, res, next)
 
 })
 
@@ -63,11 +80,17 @@ const resetPassword = tryCatchAsync(async (req: Request, res: Response) => {
 })
 
 const googleLogin = async (req: Request, res: Response, next: NextFunction) => {
-    passport.authenticate("google", {scope: ["profile", "email"]})(req, res, next)
+    const redirectUrl = req.query.redirect as string || "/"
+    passport.authenticate("google", {scope: ["profile", "email"], state: redirectUrl})(req, res, next)
 }
 
 const googleLoginCallback = async (req: Request, res: Response) => {
     const user = req.user as Express.User
+    let redirectTo = req.query.state as string || "/"
+
+    if(redirectTo.startsWith("/")) {
+        redirectTo = redirectTo.slice(1)
+    }
     
     if(!user) {
         throw new AppError("User not found", httpStatus.NOT_FOUND)
@@ -84,8 +107,27 @@ const googleLoginCallback = async (req: Request, res: Response) => {
 
     setAuthCookie(res, accessToken, refreshToken)
     
-    res.redirect(`${config.FRONTEND_URL}`)
+    res.redirect(`${config.FRONTEND_URL}/${redirectTo}`)
     
+}
+
+const userLogout = async (_req: Request, res: Response) => {
+    // res.clearCookie("accessToken", {
+    //     httpOnly: true,
+    //     secure: config.IS_PRODUCTION,
+    //     sameSite: "strict",
+    //     maxAge: 24 * 60 * 60 * 1000
+    // })
+
+    res.clearCookie("accessToken")
+    res.clearCookie("refreshToken")
+
+    SendResponse(res, {
+        StatusCode: httpStatus.OK,
+        success: true,
+        message: "User Logout successful",
+        data: null
+    })
 }
 
 export const authController = {
@@ -93,5 +135,7 @@ export const authController = {
     refreshToken,
     resetPassword,
     googleLogin,
-    googleLoginCallback
+    googleLoginCallback,
+    userLogout,
+    registerUser
 }
