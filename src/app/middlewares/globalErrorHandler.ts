@@ -57,6 +57,7 @@ const GlobalErrorHandler = (error: any, _req: Request, res: Response, _next: Nex
         success: false,
         message,
         error: errorSources,
+        err: config.IS_DEVELOPMENT ? error : null,
         stack: config.IS_DEVELOPMENT ? error.stack : null
     })
 }
